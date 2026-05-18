@@ -1,48 +1,64 @@
-# Browser Automation Project
+# browser_automation
 
-A local browser automation agent that uses Chrome via Chrome DevTools Protocol (CDP) to perform tasks on the web.
+Misc automation tasks on PJ's local macbook, driving the user's real Chrome browser to perform jobs on the web.
 
-## Tools & Frameworks
+## Goal
 
-### Primary
-- **[Stagehand](https://github.com/browserbase/stagehand)** — High-level agent framework for browser automation. Best for complex multi-step workflows, reasoning, and natural language instructions.
-- **[Chrome DevTools MCP](https://github.com/ChromeDevTools/chrome-devtools-mcp)** — Direct Chrome DevTools access via MCP skill. Best for low-level control, debugging, and DevTools-specific operations.
-- **[browser-use](https://github.com/browser-use/browser-use)** — Alternative agent framework. Use if stagehand doesn't fit the task.
+A small collection of scripts/agents that automate everyday browser work (form filling, scraping, account chores, multi-step web flows) by connecting to the user's **local Chrome** over the Chrome DevTools Protocol (CDP). Not a cloud project — everything runs on this machine against the user's logged-in browser session.
 
-### Local Chrome
-All automation runs against local Chrome via CDP. No remote browsers or BrowserBase cloud.
+## Toolbox
 
-## When to Use Each Tool
+Pick the best tool per job:
 
-| Tool | Use When |
-|------|----------|
-| **Stagehand** | Multi-step tasks, natural language reasoning, high-level workflows, when you need the agent to reason about what to do next |
-| **Chrome DevTools MCP** | Direct element inspection, network interception, performance profiling, debugging, low-level browser control |
-| **browser-use** | Stagehand doesn't fit the use case, or you need a different agent architecture |
+1. **[Stagehand](https://github.com/browserbase/stagehand)** — primary. AI-first browser automation built on Playwright (TypeScript/Node). Use over local Chrome via CDP. Good when natural-language `act` / `extract` / `observe` beats hand-written selectors.
+2. **[chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp/blob/main/skills/chrome-devtools-cli/SKILL.md)** — when an MCP-driven Claude Code session needs direct CDP control (DOM, network, perf, console) without writing a script.
+3. **[browser-use](https://github.com/browser-use/browser-use)** — Python alternative when the task is better expressed as an agent loop, or when Python is more convenient (data libs, existing scripts).
 
-## Global Tooling Rules
+Rules of thumb:
+- Deterministic flow with stable selectors → plain Playwright/Stagehand `page.*` calls.
+- Flow that needs LLM reasoning on the page → Stagehand `act`/`extract`.
+- One-off interactive browser control from Claude Code → chrome-devtools-mcp.
+- Python ecosystem fits better → browser-use.
 
-See parent CLAUDE.md for:
-- Python: `uv` only
-- Node/JS: `pnpm` only
-- Versions: `mise` only
-- Env vars: `mise.toml` + `.env`
-- Docker: `colima` runtime
+## Connecting to local Chrome (CDP)
 
-## Getting Started
+Launch Chrome with a remote debugging port, then attach to it instead of spawning a fresh browser. This preserves logged-in sessions, extensions, and profile state.
 
-1. Install Stagehand: `uv add stagehand`
-2. Ensure Chrome is available locally
-3. Create agents that use CDP to control local Chrome
+```bash
+# macOS — launch Chrome with CDP enabled (dedicated profile to avoid conflicts with daily browsing)
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$HOME/.chrome-automation-profile"
+```
 
-## Example Task Structure
+Stagehand: set `env: "LOCAL"` and pass `localBrowserLaunchOptions.cdpUrl: "http://localhost:9222"`.
+
+## Tooling conventions (this machine)
+
+Per `~/.claude/CLAUDE.md`:
+
+- **Node/TS**: `pnpm` only (no `npm` / `yarn` / `npx` — use `pnpm dlx`). `bun run` for fast one-shot TS execution.
+- **Python**: `uv` only (`uv add`, `uv run`, `uv sync`).
+- **Versions**: `mise` only. Add a `mise.toml` when a project pins versions.
+- **Env**: `mise.toml [env]` + `.env`. No `direnv`.
+- **Secrets**: never commit `.env`. LLM API keys (OpenAI / Anthropic for Stagehand) go in `.env`.
+
+Stagehand is a Node package (`pnpm add @browserbasehq/stagehand`). browser-use is a Python package (`uv add browser-use`).
+
+## Repo layout (evolving)
 
 ```
-Task: [High-level goal]
-Tool: [stagehand/chrome-devtools-mcp/browser-use]
-Steps:
-  1. Navigate to [URL]
-  2. Locate [element via CSS/XPath]
-  3. Perform [action]
-  4. Verify [result]
+/                    # root
+  AGENTS.md          # this file (also symlinked to .claude/CLAUDE.md)
+  tasks/             # individual automation scripts, one folder per task
+  lib/               # shared helpers (CDP connection, Chrome launcher, etc.)
 ```
+
+Each task in `tasks/<name>/` should be self-contained with its own README explaining what it does and how to run it.
+
+## Working agreements for AI agents
+
+- Confirm before any destructive web action (deleting accounts, sending messages, posting publicly, money movement). Read-only / data-extraction tasks can proceed.
+- Default to attaching to the existing Chrome over CDP rather than spawning a fresh Playwright browser, so the user's logins are reused.
+- When a script needs credentials or 2FA, prompt the user — do not attempt to bypass.
+- Prefer the smallest tool that works. Don't pull in Stagehand+LLM if a 5-line Playwright script does the job.
