@@ -1,0 +1,28 @@
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+pnpm-debug.log*
+.pnpm-store/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.uv/
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Local Chrome automation profile (if accidentally created in repo)
+.chrome-automation-profile/
+
+# Local Claude settings overrides
+.claude/settings.local.json
