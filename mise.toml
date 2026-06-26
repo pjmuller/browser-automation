@@ -2,4 +2,4 @@
 python = "3.13"
 
 [env]
-_.file = ".env"
+_.file = { path = "{{env.HOME}}/.config/mise-env/pjmuller/browser_automation.env", redact = true }
