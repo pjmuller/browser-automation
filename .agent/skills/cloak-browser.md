@@ -27,10 +27,11 @@ CLOAK_HEADED=1 uv run cloak       # opens a real Chromium window
 # log in to LinkedIn / target sites inside the window, then Ctrl-C to quit
 ```
 
-After that, run **headless** (the default) — no window, no focus stolen, session survives via the persistent profile at `~/.cloak-automation-profile`:
+The launcher stays **headed by default** (`scripts/cloak.py`, `CLOAK_HEADED=1`) — a headless run hides captcha / 2FA / login walls in an invisible tab and blocks the batch silently. The window sits quietly on another desktop; nothing ever steals focus. Session survives via the persistent profile at `~/.cloak-automation-profile`:
 
 ```bash
-uv run cloak       # headless launcher on CDP :9222
+uv run cloak                    # headed launcher on CDP :9222
+CLOAK_HEADED=0 uv run cloak     # only for truly unattended runs (cron); don't change the default
 ```
 
 ## The loop
@@ -97,6 +98,7 @@ Run it, read the output, narrow the selector, repeat. For modals/dropdowns: dump
 - **`page.wait_for_timeout()` triggers reCAPTCHA v3 detection** (per CloakBrowser docs) — prefer `time.sleep()` for any flow that crosses a reCAPTCHA. For non-captcha flows `wait_for_timeout` is fine.
 - **Use `page.type()` not `page.fill()` on aggressive sites** so the humanize per-keystroke delay actually fires.
 - **`page.goto(..., wait_until="domcontentloaded")` hangs on LinkedIn** (and any SPA with long-poll connections). Use `wait_until="commit"` with a short timeout, then `page.wait_for_function(...)` on something you actually need.
+- **A `Page` handle goes stale mid-run** — long batches eventually hit `"Target page, context or browser has been closed"` while the browser itself is fine (LinkedIn and other SPAs close/replace the tab on a navigation or login refresh). Don't tear down the `attach()` context: `ctx.pages` is still valid — catch the error, re-acquire with `find_or_new(ctx, predicate)` (+ `humanize`), retry the current row once. Reference: `reacquire_page` in `tasks/linkedin_connect/connect.py`.
 - **`Execution context was destroyed` mid-`evaluate`** — happens when the site does a client-side redirect after your `goto` commits but before your `evaluate` runs. Catch, `wait_for_timeout(2000)`, retry the evaluate once.
 - **Pass `page.evaluate` a string IIFE** (`page.evaluate("(() => { ... })()")`), not a Python lambda. The browser context doesn't see your Python helpers.
 - **IIFE must end with `})()`** — the trailing `()` actually invokes it. Without it, you serialize the function expression and get `undefined`.
