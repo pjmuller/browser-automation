@@ -8,7 +8,7 @@ Local browser automation scripts driving a **CloakBrowser** stealth Chromium ove
 mise install                              # Python 3.13
 uv sync                                   # installs cloakbrowser + playwright
 uv run python -m cloakbrowser install     # ~140 MB stealth Chromium → ~/.cloakbrowser/
-cp .env.example .env
+# env: keys from .env.example go in ~/.config/mise-env/pjmuller/browser_automation.env (loaded by mise.toml)
 ```
 
 Log in to LinkedIn / target sites once — run the launcher in **headed** mode so a real window opens:
