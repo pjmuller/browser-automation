@@ -45,8 +45,8 @@ Per `~/.claude/CLAUDE.md`:
 
 - **Python**: `uv` only (`uv add`, `uv run`, `uv sync`). No pip / poetry / venv.
 - **Versions**: `mise` only. `mise.toml` pins Python 3.13.
-- **Env**: `mise.toml [env]` + `.env`. No `direnv`.
-- **Secrets**: never commit `.env`. The repo has no LLM dependencies — CloakBrowser does it all without API keys.
+- **Env**: `mise.toml [env]` loads `~/.config/mise-env/pjmuller/browser_automation.env` (keys in `.env.example`); no repo `.env`, no `direnv`. Not loaded → `mise exec -- <cmd>`.
+- **Secrets**: never commit secrets. The repo has no LLM dependencies — CloakBrowser does it all without API keys.
 
 CloakBrowser is a Python package: `cloakbrowser>=0.3.28`. Pulls in Playwright Python 1.60.
 

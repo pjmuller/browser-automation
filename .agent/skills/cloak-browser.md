@@ -17,7 +17,7 @@ Skip this skill (and use an LLM-driven loop) only when the flow is one-shot, the
 mise install                              # Python 3.13
 uv sync                                   # installs cloakbrowser + playwright
 uv run python -m cloakbrowser install     # downloads the 140 MB stealth Chromium
-cp .env.example .env
+# env: keys from .env.example go in ~/.config/mise-env/pjmuller/browser_automation.env (loaded by mise.toml)
 ```
 
 First time only — run **headed** to log in:
