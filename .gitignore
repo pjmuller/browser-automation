@@ -29,3 +29,10 @@ tasks/**/*.local.csv
 tasks/**/*.local.json
 tasks/**/*.results.csv
 
+
+# Scraped profiles and personal outreach/search batches stay local.
+/tasks/linkedin_profile/data/
+/tasks/linkedin_profile/input*.csv
+/tasks/linkedin_connect/profiles_*.csv
+/tasks/linkedin_search/input.csv
+/tasks/linkedin_search/retry.csv
