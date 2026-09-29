@@ -19,6 +19,10 @@ linkedin-search = "tasks.linkedin_search.search:main"
 linkedin-search-explore = "tasks.linkedin_search.explore:main"
 linkedin-profile = "tasks.linkedin_profile.scrape:main"
 linkedin-profile-explore = "tasks.linkedin_profile.explore:main"
+linkedin-profile-batch = "tasks.linkedin_profile.batch:main"
+linkedin-profile-export = "tasks.linkedin_profile.export:main"
+kotwijs-login = "tasks.kotwijs_login.login:main"
+kotwijs-login-explore = "tasks.kotwijs_login.explore:main"
 
 [tool.uv]
 package = true
