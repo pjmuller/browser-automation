@@ -38,7 +38,8 @@ uv run kotwijs-login --email someone@example.com
 ```
 
 Credentials resolution:
-- **email** — `KOTWIJS_EMAIL` env → `--email` → default `landlord@example.com`.
+- **email** — `--email` → `KOTWIJS_EMAIL` from the private mise env file
+  (`~/.config/mise-env/pjmuller/browser_automation.env`); no default, exits if missing.
 - **password** — `KOTWIJS_PASSWORD` env → interactive `getpass` prompt (never
   echoed, never logged, never committed).
 

@@ -1,7 +1,7 @@
 """Log in to the kotwijs.be landlord portal via the running CloakBrowser.
 
 Credentials:
-  - email    : KOTWIJS_EMAIL env var, else --email, else the default below.
+  - email    : --email, else KOTWIJS_EMAIL (private mise env file); no default.
   - password : KOTWIJS_PASSWORD env var, else a getpass prompt (never logged).
 
 Run:  uv run kotwijs-login                 # prompts for password
@@ -19,7 +19,6 @@ import sys
 from lib.browser import attach, find_or_new, humanize
 
 LOGIN_URL = "https://kotwijs.be/login/landlord"
-DEFAULT_EMAIL = "landlord@example.com"
 
 
 def _dismiss_cookies(page) -> None:
@@ -37,8 +36,10 @@ def _dismiss_cookies(page) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Log in to the kotwijs landlord portal.")
-    ap.add_argument("--email", default=os.environ.get("KOTWIJS_EMAIL", DEFAULT_EMAIL))
+    ap.add_argument("--email", default=os.environ.get("KOTWIJS_EMAIL"))
     args = ap.parse_args()
+    if not args.email:
+        sys.exit("No email: pass --email or set KOTWIJS_EMAIL in the mise env file.")
 
     password = os.environ.get("KOTWIJS_PASSWORD") or getpass.getpass(
         f"kotwijs password for {args.email}: "
@@ -57,7 +58,7 @@ def main() -> None:
         _dismiss_cookies(page)
 
         # kotwijs uses React controlled inputs that drop/reorder fast humanized
-        # keystrokes (observed: "name@..." → "tipes.be"). fill() sets the value
+        # keystrokes (observed: "name@..." arriving as "tmeas.be"). fill() sets the value
         # atomically and still dispatches the input events React needs.
         email_box = page.locator("input[type=email]").first
         pw_box = page.locator("input[type=password]").first
